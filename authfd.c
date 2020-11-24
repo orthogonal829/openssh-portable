@@ -1,4 +1,4 @@
-/* $OpenBSD: authfd.c,v 1.123 2020/03/06 18:24:39 markus Exp $ */
+/* $OpenBSD: authfd.c,v 1.126 2020/10/29 02:52:43 djm Exp $ */
 /*
  * Author: Tatu Ylonen <ylo@cs.hut.fi>
  * Copyright (c) 1995 Tatu Ylonen <ylo@cs.hut.fi>, Espoo, Finland
@@ -62,7 +62,7 @@
 #include "ssherr.h"
 
 #define MAX_AGENT_IDENTITIES	2048		/* Max keys in agent reply */
-#define MAX_AGENT_REPLY_LEN	(256 * 1024) 	/* Max bytes in agent reply */
+#define MAX_AGENT_REPLY_LEN	(256 * 1024)	/* Max bytes in agent reply */
 
 /* macro to check for "agent failure" message */
 #define agent_failed(x) \
@@ -336,7 +336,7 @@ ssh_free_identitylist(struct ssh_identitylist *idl)
  * Returns 0 if found, or a negative SSH_ERR_* error code on failure.
  */
 int
-ssh_agent_has_key(int sock, struct sshkey *key)
+ssh_agent_has_key(int sock, const struct sshkey *key)
 {
 	int r, ret = SSH_ERR_KEY_NOT_FOUND;
 	size_t i;
@@ -507,7 +507,7 @@ ssh_add_identity_constrained(int sock, struct sshkey *key,
 		    SSH2_AGENTC_ADD_IDENTITY;
 		if ((r = sshbuf_put_u8(msg, type)) != 0 ||
 		    (r = sshkey_private_serialize_maxsign(key, msg, maxsign,
-		    NULL)) != 0 ||
+		    0)) != 0 ||
 		    (r = sshbuf_put_cstring(msg, comment)) != 0)
 			goto out;
 		break;
@@ -534,7 +534,7 @@ ssh_add_identity_constrained(int sock, struct sshkey *key,
  * This call is intended only for use by ssh-add(1) and like applications.
  */
 int
-ssh_remove_identity(int sock, struct sshkey *key)
+ssh_remove_identity(int sock, const struct sshkey *key)
 {
 	struct sshbuf *msg;
 	int r;
